@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Powered Image Recognition System - Face Detection, Image Analysis, Color Extraction, and Advanced Filters">
+    <title>Image Recognition System | AI-Powered Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="url(#grad)" stroke-width="2"/>
+                        <circle cx="20" cy="20" r="8" fill="url(#grad)"/>
+                        <circle cx="20" cy="20" r="3" fill="#0a0f1e"/>
+                        <line x1="20" y1="2" x2="20" y2="8" stroke="url(#grad)" stroke-width="1.5"/>
+                        <line x1="20" y1="32" x2="20" y2="38" stroke="url(#grad)" stroke-width="1.5"/>
+                        <line x1="2" y1="20" x2="8" y2="20" stroke="url(#grad)" stroke-width="1.5"/>
+                        <line x1="32" y1="20" x2="38" y2="20" stroke="url(#grad)" stroke-width="1.5"/>
+                        <defs>
+                            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00f5d4"/>
+                                <stop offset="50%" style="stop-color:#7b61ff"/>
+                                <stop offset="100%" style="stop-color:#ff6b9d"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>VisionAI</h1>
+                    <span class="logo-subtitle">Image Recognition System</span>
+                </div>
+            </div>
+            <nav id="main-nav">
+                <button class="nav-btn active" data-tab="upload" id="nav-upload">
+                    <span class="nav-icon">📷</span> Analyze
+                </button>
+                <button class="nav-btn" data-tab="filters" id="nav-filters">
+                    <span class="nav-icon">🎨</span> Filters
+                </button>
+                <button class="nav-btn" data-tab="compare" id="nav-compare">
+                    <span class="nav-icon">🔀</span> Compare
+                </button>
+                <button class="nav-btn" data-tab="about" id="nav-about">
+                    <span class="nav-icon">ℹ️</span> About
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- ============ ANALYZE TAB ============ -->
+        <section id="tab-upload" class="tab-content active">
+            <div class="section-header">
+                <h2 class="gradient-text">Analyze Your Image</h2>
+                <p class="section-desc">Upload an image to detect faces, extract colors, analyze edges, and more.</p>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-container">
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 80 80" fill="none">
+                            <rect x="10" y="20" width="60" height="45" rx="8" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+                            <circle cx="30" cy="38" r="6" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="15,58 30,45 42,52 52,38 65,55" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+                            <path d="M40 5 L40 25 M30 15 L40 5 L50 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Drop your image here</h3>
+                    <p>or <span class="upload-browse">browse files</span></p>
+                    <p class="upload-hint">Supports JPG, PNG, BMP, WEBP • Max 16MB</p>
+                    <input type="file" id="image-input" accept="image/*" hidden>
+                </div>
+
+                <!-- Image Preview -->
+                <div class="preview-container hidden" id="preview-container">
+                    <div class="preview-wrapper">
+                        <img id="preview-image" alt="Preview">
+                        <div class="preview-overlay">
+                            <button class="btn btn-sm" id="btn-change-image">Change Image</button>
+                        </div>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn btn-primary btn-lg" id="btn-analyze">
+                            <span class="btn-icon">🔍</span> Analyze Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading-container hidden" id="loading-container">
+                <div class="loading-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-text">Analyzing image with AI...</p>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-container hidden" id="results-container">
+                <div class="results-header">
+                    <h2 class="gradient-text">Analysis Results</h2>
+                    <span class="results-time" id="results-time"></span>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid" id="stats-grid"></div>
+
+                <!-- Results Tabs -->
+                <div class="results-tabs">
+                    <button class="result-tab active" data-result="faces" id="result-tab-faces">
+                        👤 Face Detection
+                    </button>
+                    <button class="result-tab" data-result="colors" id="result-tab-colors">
+                        🎨 Color Analysis
+                    </button>
+                    <button class="result-tab" data-result="edges" id="result-tab-edges">
+                        📐 Edge Detection
+                    </button>
+                    <button class="result-tab" data-result="histogram" id="result-tab-histogram">
+                        📊 Histogram
+                    </button>
+                    <button class="result-tab" data-result="contours" id="result-tab-contours">
+                        🔲 Contours
+                    </button>
+                </div>
+
+                <!-- Face Detection Result -->
+                <div class="result-panel active" id="panel-faces">
+                    <div class="result-card">
+                        <div class="result-image-container">
+                            <img id="face-result-img" alt="Face Detection Result">
+                        </div>
+                        <div class="face-details" id="face-details"></div>
+                    </div>
+                </div>
+
+                <!-- Color Analysis Result -->
+                <div class="result-panel" id="panel-colors">
+                    <div class="result-card">
+                        <h3>Dominant Colors</h3>
+                        <div class="color-palette" id="color-palette"></div>
+                        <div class="color-bars" id="color-bars"></div>
+                    </div>
+                </div>
+
+                <!-- Edge Detection Result -->
+                <div class="result-panel" id="panel-edges">
+                    <div class="result-card">
+                        <div class="result-image-container">
+                            <img id="edge-result-img" alt="Edge Detection Result">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histogram Result -->
+                <div class="result-panel" id="panel-histogram">
+                    <div class="result-card">
+                        <div class="chart-container">
+                            <canvas id="histogram-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contours Result -->
+                <div class="result-panel" id="panel-contours">
+                    <div class="result-card">
+                        <div class="result-image-container">
+                            <img id="contour-result-img" alt="Contour Detection Result">
+                        </div>
+                        <p class="contour-info" id="contour-info"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ FILTERS TAB ============ -->
+        <section id="tab-filters" class="tab-content">
+            <div class="section-header">
+                <h2 class="gradient-text">Image Filters</h2>
+                <p class="section-desc">Apply stunning visual effects to your images using advanced OpenCV algorithms.</p>
+            </div>
+
+            <div class="upload-container">
+                <div class="upload-zone" id="filter-upload-zone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 80 80" fill="none">
+                            <rect x="10" y="20" width="60" height="45" rx="8" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+                            <circle cx="30" cy="38" r="6" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="15,58 30,45 42,52 52,38 65,55" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+                            <path d="M40 5 L40 25 M30 15 L40 5 L50 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Drop an image for filtering</h3>
+                    <p>or <span class="upload-browse">browse files</span></p>
+                    <input type="file" id="filter-image-input" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <div class="filter-workspace hidden" id="filter-workspace">
+                <div class="filter-grid">
+                    <div class="filter-original">
+                        <h3>Original</h3>
+                        <img id="filter-original-img" alt="Original Image">
+                    </div>
+                    <div class="filter-result">
+                        <h3 id="filter-result-title">Filtered</h3>
+                        <img id="filter-result-img" alt="Filtered Image">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-sm" id="btn-change-filter">↩ Change Image</button>
+                </div>
+                <div class="filter-buttons" id="filter-buttons"></div>
+            </div>
+        </section>
+
+        <!-- ============ COMPARE TAB ============ -->
+        <section id="tab-compare" class="tab-content">
+            <div class="section-header">
+                <h2 class="gradient-text">Compare Images</h2>
+                <p class="section-desc">Upload two images to measure structural similarity and visualize differences.</p>
+            </div>
+
+            <div class="compare-upload-grid">
+                <div class="compare-upload-box" id="compare-box-1">
+                    <div class="upload-zone compact">
+                        <div class="upload-icon small">📷</div>
+                        <h3>Image 1</h3>
+                        <p>Drop or <span class="upload-browse">browse</span></p>
+                        <input type="file" id="compare-input-1" accept="image/*" hidden>
+                    </div>
+                    <img class="compare-preview hidden" id="compare-preview-1" alt="Image 1">
+                </div>
+                <div class="compare-vs">VS</div>
+                <div class="compare-upload-box" id="compare-box-2">
+                    <div class="upload-zone compact">
+                        <div class="upload-icon small">📷</div>
+                        <h3>Image 2</h3>
+                        <p>Drop or <span class="upload-browse">browse</span></p>
+                        <input type="file" id="compare-input-2" accept="image/*" hidden>
+                    </div>
+                    <img class="compare-preview hidden" id="compare-preview-2" alt="Image 2">
+                </div>
+            </div>
+
+            <div class="compare-actions">
+                <button class="btn btn-primary btn-lg" id="btn-compare" disabled>
+                    <span class="btn-icon">🔀</span> Compare Images
+                </button>
+            </div>
+
+            <div class="compare-results hidden" id="compare-results">
+                <div class="similarity-score" id="similarity-score">
+                    <div class="score-ring">
+                        <svg viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
+                                    stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3"
+                                    id="score-circle" transform="rotate(-90 60 60)"/>
+                            <defs>
+                                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#00f5d4"/>
+                                    <stop offset="100%" style="stop-color:#7b61ff"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <span class="score-value" id="score-value">0%</span>
+                    </div>
+                    <h3>Similarity Score</h3>
+                </div>
+                <div class="compare-metrics" id="compare-metrics"></div>
+                <div class="compare-diff-container">
+                    <h3>Difference Heatmap</h3>
+                    <img id="diff-heatmap" alt="Difference Heatmap">
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ ABOUT TAB ============ -->
+        <section id="tab-about" class="tab-content">
+            <div class="section-header">
+                <h2 class="gradient-text">About Image Recognition</h2>
+                <p class="section-desc">Understanding the science behind computer vision and machine learning.</p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon">🧠</div>
+                    <h3>What is Image Recognition?</h3>
+                    <p>Image recognition is a widely used application of machine learning, where algorithms analyze digital images by measuring pixel values. It's employed in various contexts, including face recognition, which identifies individuals and can trigger relevant notifications. This showcases the practicality and versatility of machine learning in diverse fields.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">👤</div>
+                    <h3>Face Detection</h3>
+                    <p>Our system uses Haar Cascade Classifiers — a machine learning-based approach that uses a cascade of trained classifiers to detect faces in images. It can identify faces, eyes, and smiles in real-time with high accuracy.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">🎨</div>
+                    <h3>Color Analysis</h3>
+                    <p>Using K-Means clustering, we extract the dominant colors from any image. This unsupervised learning algorithm groups similar pixel colors together to identify the primary color palette of the image.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">📐</div>
+                    <h3>Edge Detection</h3>
+                    <p>The Canny edge detection algorithm identifies boundaries and contours within images by finding areas of rapid intensity change. This is fundamental to understanding the structure and composition of images.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">📊</div>
+                    <h3>Histogram Analysis</h3>
+                    <p>Color histograms represent the distribution of pixel intensities across the RGB channels. This analysis reveals the tonal characteristics and exposure quality of an image.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">⚙️</div>
+                    <h3>Technology Stack</h3>
+                    <p>Built with Python, Flask, OpenCV, NumPy, and scikit-learn. The frontend uses vanilla JavaScript with Chart.js for visualizations. All processing happens server-side using proven computer vision algorithms.</p>
+                </div>
+            </div>
+
+            <div class="tech-badges">
+                <span class="badge">Python 3.13</span>
+                <span class="badge">Flask</span>
+                <span class="badge">OpenCV</span>
+                <span class="badge">NumPy</span>
+                <span class="badge">scikit-learn</span>
+                <span class="badge">Chart.js</span>
+                <span class="badge">Pillow</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>VisionAI — Image Recognition System • Built with OpenCV &amp; Machine Learning</p>
+            <p class="footer-sub">Task 2: Image Recognition Project</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
